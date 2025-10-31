@@ -1,0 +1,99 @@
+Falta por cuadrar
+
+en perfil de atencion al usuario, ENCUESTAS SATISFACCIÓN y TURNO  tienene el mismo link
+Faltan los tableros de: Almacen, comunicaciones, Tableros, Gestion del riesgo, Planeación, 
+
+
+AtencionUsuario
+Almacen
+Aseguramiento
+SistemasIntegrados
+Cartera
+Comunicaciones
+Contabilidad
+Saos
+Contrataciones
+TablerosU
+Sistemas
+GestionRiesgo
+Planeación
+RadAudCuentas
+Recobros
+Tesoreria
+
+Registrar usuarios tablero ATENCION AL USUARIO: http://localhost/MallamasAdministrador/registroAtencionUsuario.php
+Credencial: 111
+Registrar usuarios tablero ALMACEN: http://localhost/MallamasAdministrador/registroAlmacen.php
+Credencial: 112
+Registrar usuarios tablero ASEGURAMIENTO: http://localhost/MallamasAdministrador/registroAseguramiento.php
+Credencial: 113
+Registrar usuarios tablero SISTEMAS: INTEGRADOS http://localhost/MallamasAdministrador/registroSistemasIntegrados.php
+Credencial: 114
+Registrar usuarios tablero CARTERA: http://localhost/MallamasAdministrador/registroCartera.php
+Credencial: 115
+Registrar usuarios tablero COMUNICACIONES: http://localhost/MallamasAdministrador/registroComunicaciones.php
+Credencial: 116
+Registrar usuarios tablero CONTABILIDAD: http://localhost/MallamasAdministrador/registroContabilidad.php
+Credencial: 117
+Registrar usuarios tablero SAOS: http://localhost/MallamasAdministrador/registroSaos.php
+Credencial: 118
+Registrar usuarios tablero CONTRATACIONES: http://localhost/MallamasAdministrador/registroContrataciones.php
+Credencial: 119
+Registrar usuarios tablero TABLEROS: http://localhost/MallamasAdministrador/registroTablerosU.php
+Credencial: 121
+Registrar usuarios tablero SISTEMAS: http://localhost/MallamasAdministrador/registroSistemas.php
+Credencial: 122
+Registrar usuarios tablero GESTION DEL RIESGO: http://localhost/MallamasAdministrador/registroGestionRiesgo.php
+Credencial: 123
+Registrar usuarios tablero PLANEACIÓN: http://localhost/MallamasAdministrador/registroPlaneación.php
+Credencial: 124
+Registrar usuarios tablero RADICACIÓN: Y AUDITORÍA DE CUENTAS http://localhost/MallamasAdministrador/registroRadAudCuentas.php
+Credencial: 125
+Registrar usuarios tablero RECOBROS: http://localhost/MallamasAdministrador/registroRecobros.php
+Credencial: 126
+Registrar usuarios tablero TESORERÍA: http://localhost/MallamasAdministrador/registroTesoreria.php
+Credencial: 127
+
+
+
+                                                         
+                                                    <div class="card-body">
+                                                        <button type="button" class="btn btn-light" data-toggle="modal" data-target="#modalPowerBI">
+                                                            <img src="../static/img/imgSistemas/SI1.png"
+                                                                class="card-img-top"
+                                                                style="width:100px; height:100px; object-fit:contain; display:block; margin:auto;"
+                                                                alt="MallamasImg">
+                                                        </button>
+                                                    </div>
+
+
+
+    <script src="../static/plugins/jquery/jquery.min.js"></script> 
+    <script src="../static/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+
+    <!------------------------------------------ Modal Power bi nota tecnica --------------------------------->
+    <div class="modal fade" id="modalPowerBI" tabindex="-1" aria-labelledby="modalPowerBILabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl" style="max-width: 90%;">
+            <div class="modal-content">
+                <div class="modal-header" style="background-color:#038f03ff; color:white;">
+                    <h5 class="modal-title" id="modalPowerBILabel">Tablero Nota Técnica - Sistemas</h5>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Cerrar">
+                    <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body p-0">
+                    <div class="iframe-container" style="position:relative; width:100%; padding-bottom:70%; height:0; overflow:hidden;">
+                    <iframe src="https://app.powerbi.com/view?r=eyJrIjoiYmM1ZjBhMjQtN2E0Yy00YTE2LWJmMDQtMTE1MjBmOTEyYzA3IiwidCI6ImIxMmQwMGE5LWZjYjMtNDgzNi1iMDk0LWU3ZWNmZDAyM2U5OSIsImMiOjR9"
+                            allowFullScreen="true"
+                            style="position:absolute; top:0; left:0; width:100%; height:100%; border:none;">
+                    </iframe>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" data-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--------------------------------------------------------------------------------------------->  
