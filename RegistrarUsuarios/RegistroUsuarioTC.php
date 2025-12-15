@@ -1,3 +1,18 @@
+<?php
+session_start();
+
+// Bloqueo de caché del navegador
+header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+header("Cache-Control: post-check=0, pre-check=0", false);
+header("Pragma: no-cache");
+
+// Verificación de clave
+if (!isset($_SESSION['acceso_registro']) || $_SESSION['acceso_registro'] !== true) {
+    header("Location: ../index.php?error=acceso_denegado");
+    exit;
+}
+?>
+
 
 <!DOCTYPE html> 
 <html lang="en">
@@ -205,7 +220,7 @@
                                                       <br>
                                                       <table align="center">
                                                             <td>
-                                                             <a href="../index.php" class="btn btn-danger border-dark text-white">Salir</a>
+                                                             <a href="../php/logout_registro.php" class="btn btn-danger border-dark text-white">Salir</a>
                                                             </td>
                                                       </table>
                                                 </table>	
