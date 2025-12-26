@@ -160,6 +160,82 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['activarSU'])) {
         $mensaje = "Super Usuario Temporal eliminado correctamente";
     }
 
+     // =================== PERMISOS SU TEMPORAL ===================
+    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['agregar_permiso'])) {
+
+        $id = $_POST['id_su_temp'];
+        $permiso = $_POST['agregar_permiso'];
+
+        $mapa = [
+            'registrar_indicador' => 'p_registrar_indicador',
+            'registrar_resultado' => 'p_registrar_resultado',
+            'editar_indicador'    => 'p_editar_indicador',
+            'eliminar_indicador'  => 'p_eliminar_indicador'
+        ];
+
+        if (isset($mapa[$permiso])) {
+
+            $campo = $mapa[$permiso];
+
+            $sql = "
+                UPDATE super_usuario_temporal
+                SET $campo = 1
+                WHERE id_su_temp = ?
+            ";
+
+            $stmt = sqlsrv_query(
+                $conexionGestionIndicadores,
+                $sql,
+                [$id]
+            );
+
+            if ($stmt === false) {
+                die(print_r(sqlsrv_errors(), true));
+            }
+
+            $mensaje = "Permiso agregado correctamente";
+        }
+    }
+
+    // =================== QUITAR PERMISOS SU TEMPORAL ===================
+    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['quitar_permiso'])) {
+
+        $id = $_POST['id_su_temp'];
+        $permiso = $_POST['quitar_permiso'];
+
+        $mapa = [
+            'registrar_indicador' => 'p_registrar_indicador',
+            'registrar_resultado' => 'p_registrar_resultado',
+            'editar_indicador'    => 'p_editar_indicador',
+            'eliminar_indicador'  => 'p_eliminar_indicador'
+        ];
+
+        if (isset($mapa[$permiso])) {
+
+            $campo = $mapa[$permiso];
+
+            $sql = "
+                UPDATE super_usuario_temporal
+                SET $campo = 0
+                WHERE id_su_temp = ?
+            ";
+
+            $stmt = sqlsrv_query(
+                $conexionGestionIndicadores,
+                $sql,
+                [$id]
+            );
+
+            if ($stmt === false) {
+                die(print_r(sqlsrv_errors(), true));
+            }
+
+            $mensaje = "Permiso retirado correctamente";
+        }
+    }
+
+
+
 // Cargar usuarios NO super usuario
 $sqlUsuarios = "
     SELECT Cedula, Nombres, Apellidos
@@ -175,18 +251,22 @@ $usuarios = sqlsrv_query(
 
 //Consultar SU temporales activos
 $sqlSUTemporales = "
-    SELECT 
-        sut.id_su_temp,
-        sut.Cedula,
-        p.Nombres,
-        p.Apellidos,
-        sut.fecha_inicio,
-        sut.fecha_fin
-    FROM super_usuario_temporal sut
-    INNER JOIN persona p ON sut.Cedula = p.Cedula
-    WHERE GETDATE() BETWEEN sut.fecha_inicio AND sut.fecha_fin
-    ORDER BY sut.fecha_fin ASC
-";
+            SELECT 
+            sut.id_su_temp,
+            sut.Cedula,
+            p.Nombres,
+            p.Apellidos,
+            sut.fecha_inicio,
+            sut.fecha_fin,
+            sut.p_registrar_indicador,
+            sut.p_registrar_resultado,
+            sut.p_editar_indicador,
+            sut.p_eliminar_indicador
+        FROM super_usuario_temporal sut
+        INNER JOIN persona p ON sut.Cedula = p.Cedula
+        WHERE GETDATE() BETWEEN sut.fecha_inicio AND sut.fecha_fin
+        ORDER BY sut.fecha_fin ASC
+        ";
 
 $suTemporales = sqlsrv_query($conexionGestionIndicadores, $sqlSUTemporales);
 
@@ -347,6 +427,7 @@ $suTemporales = sqlsrv_query($conexionGestionIndicadores, $sqlSUTemporales);
                                                     <th>Usuario</th>
                                                     <th>Desde</th>
                                                     <th>Hasta</th>
+                                                    <th>Accesos concedidos</th>
                                                     <th>Acciones</th>
                                                 </tr>
                                             </thead>
@@ -356,6 +437,27 @@ $suTemporales = sqlsrv_query($conexionGestionIndicadores, $sqlSUTemporales);
                                                     <td><?= $su['Nombres'] ?> <?= $su['Apellidos'] ?></td>
                                                     <td><?= $su['fecha_inicio']->format('Y-m-d') ?></td>
                                                     <td><?= $su['fecha_fin']->format('Y-m-d') ?></td>
+                                                    <td align="left">
+                                                    <?php
+                                                        $accesos = [];
+
+                                                        if ($su['p_registrar_indicador']) {
+                                                            $accesos[] = 'Registrar Indicadores';
+                                                        }
+                                                        if ($su['p_registrar_resultado']) {
+                                                            $accesos[] = 'Registrar Resultados';
+                                                        }
+                                                        if ($su['p_editar_indicador']) {
+                                                            $accesos[] = 'Editar Indicadores';
+                                                        }
+                                                        if ($su['p_eliminar_indicador']) {
+                                                            $accesos[] = 'Eliminar Indicadores';
+                                                        }
+
+                                                        echo empty($accesos)
+                                                            ? '<span class="text-danger">Sin accesos</span>'
+                                                            : implode('<br>', $accesos);
+                                                    ?>
                                                     <td>
 
                                                         <!-- EDITAR FECHAS -->
@@ -376,6 +478,85 @@ $suTemporales = sqlsrv_query($conexionGestionIndicadores, $sqlSUTemporales);
                                                                <i class='fas fa-trash'></i>
                                                             </button>
                                                         </form>
+
+                                                        <!-- PERMISOS SU TEMP -->
+                                                        <form method="POST" style="display:inline;">
+                                                            <br>
+                                                       
+                                                            <input type="hidden" name="id_su_temp" value="<?= $su['id_su_temp'] ?>">
+
+                                                            <br>
+                                                        
+                                                            <h6>PERMISOS</h6>
+
+                                                            <!-- registrar_indicador -->
+                                                            <?php if (!$su['p_registrar_indicador']): ?>
+                                                                <button class="btn btn-sm btn-outline-success"
+                                                                        name="agregar_permiso"
+                                                                        value="registrar_indicador">
+                                                                    + Registrar Indicadores
+                                                                </button><br>
+                                                            <?php else: ?>
+                                                                <button class="btn btn-sm btn-outline-danger"
+                                                                        name="quitar_permiso"
+                                                                        value="registrar_indicador"
+                                                                        onclick="return confirm('¿Desea quitar este permiso?');">
+                                                                    − Quitar Registrar Indicadores
+                                                                </button><br>
+                                                            <?php endif; ?>
+
+                                                            <!--  registrar_resultado -->
+                                                            <?php if (!$su['p_registrar_resultado']): ?>
+                                                                <button class="btn btn-sm btn-outline-success"
+                                                                        name="agregar_permiso"
+                                                                        value="registrar_resultado">
+                                                                    + Registrar Resultado Indicadores
+                                                                </button><br>
+                                                            <?php else: ?>
+                                                                <button class="btn btn-sm btn-outline-danger"
+                                                                        name="quitar_permiso"
+                                                                        value="registrar_resultado"
+                                                                        onclick="return confirm('¿Desea quitar este permiso?');">
+                                                                    − Quitar Registrar Resultado Indicadores
+                                                                </button><br>
+                                                            <?php endif; ?>
+
+                                                            <!--  editar_indicador -->
+                                                            <?php if (!$su['p_editar_indicador']): ?>
+                                                                <button class="btn btn-sm btn-outline-success"
+                                                                        name="agregar_permiso"
+                                                                        value="editar_indicador">
+                                                                    + Editar Indicadores
+                                                                </button><br>
+                                                            <?php else: ?>
+                                                                <button class="btn btn-sm btn-outline-danger"
+                                                                        name="quitar_permiso"
+                                                                        value="editar_indicador">
+                                                                    − Quitar Editar Indicadores
+                                                                </button><br>
+                                                            <?php endif; ?>
+
+                                                            <!--  eliminar_indicador -->
+                                                            <?php if (!$su['p_eliminar_indicador']): ?>
+                                                                <button class="btn btn-sm btn-outline-success"
+                                                                        name="agregar_permiso"
+                                                                        value="eliminar_indicador">
+                                                                    + Eliminar Indicadores
+                                                                </button><br>
+                                                            <?php else: ?>
+                                                                <button class="btn btn-sm btn-outline-danger"
+                                                                        name="quitar_permiso"
+                                                                        value="eliminar_indicador"
+                                                                        onclick="return confirm('¿Desea quitar este permiso?');">
+                                                                    − Quitar Eliminar Indicadores
+                                                                </button><br>
+                                                            <?php endif; ?>
+                                                        </form>
+
+                                                        
+
+                                                    
+                                                                
 
                                                     </td>
                                                 </tr>
