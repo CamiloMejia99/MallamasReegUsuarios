@@ -106,6 +106,60 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['activarSU'])) {
     }
 }
 
+ // =================== EDITAR FECHAS ===================
+    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['editarFechas'])) {
+
+        $id = $_POST['id_su_temp'];
+        $inicio = new DateTime($_POST['nueva_fecha_inicio']);
+        $fin    = new DateTime($_POST['nueva_fecha_fin']);
+
+        if ($fin < $inicio) {
+            $mensaje = "La fecha final no puede ser menor a la inicial";
+        } else {
+            $diff = $inicio->diff($fin)->days;
+            if ($diff > 183) {
+                $mensaje = "El rango máximo permitido es de 6 meses";
+            } else {
+                $sqlUpdate = "
+                    UPDATE super_usuario_temporal
+                    SET fecha_inicio = ?, fecha_fin = ?
+                    WHERE id_su_temp = ?
+                ";
+
+                $stmt = sqlsrv_query(
+                    $conexionGestionIndicadores,
+                    $sqlUpdate,
+                    [
+                        $inicio->format('Y-m-d H:i:s'),
+                        $fin->format('Y-m-d H:i:s'),
+                        $id
+                    ]
+                );
+
+                if ($stmt === false) {
+                    die(print_r(sqlsrv_errors(), true));
+                }
+
+                $mensaje = "Fechas del Super Usuario Temporal actualizadas correctamente";
+            }
+        }
+    }
+
+    // =================== ELIMINAR SU TEMPORAL ===================
+    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['eliminarSU'])) {
+
+        $id = $_POST['id_su_temp'];
+
+        $sqlDelete = "DELETE FROM super_usuario_temporal WHERE id_su_temp = ?";
+        $stmt = sqlsrv_query($conexionGestionIndicadores, $sqlDelete, [$id]);
+
+        if ($stmt === false) {
+            die(print_r(sqlsrv_errors(), true));
+        }
+
+        $mensaje = "Super Usuario Temporal eliminado correctamente";
+    }
+
 // Cargar usuarios NO super usuario
 $sqlUsuarios = "
     SELECT Cedula, Nombres, Apellidos
@@ -118,6 +172,24 @@ $usuarios = sqlsrv_query(
     $conexionGestionIndicadores,
     $sqlUsuarios
 );
+
+//Consultar SU temporales activos
+$sqlSUTemporales = "
+    SELECT 
+        sut.id_su_temp,
+        sut.Cedula,
+        p.Nombres,
+        p.Apellidos,
+        sut.fecha_inicio,
+        sut.fecha_fin
+    FROM super_usuario_temporal sut
+    INNER JOIN persona p ON sut.Cedula = p.Cedula
+    WHERE GETDATE() BETWEEN sut.fecha_inicio AND sut.fecha_fin
+    ORDER BY sut.fecha_fin ASC
+";
+
+$suTemporales = sqlsrv_query($conexionGestionIndicadores, $sqlSUTemporales);
+
 ?>
 
 
@@ -261,7 +333,55 @@ $usuarios = sqlsrv_query(
                                             </tr>
 
                                         </table>
+                                        <hr>
+                                        <div class="alert alert-info border-dark text-black">
+                                            <b>SUPER USUARIOS TEMPORALES ACTIVOS</b>
+                                        </div>
+
+                                        
+
                                     </form>
+                                    <table class="table table-bordered table-striped table-success">
+                                            <thead class="table-dark">
+                                                <tr align="center">
+                                                    <th>Usuario</th>
+                                                    <th>Desde</th>
+                                                    <th>Hasta</th>
+                                                    <th>Acciones</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <?php while ($su = sqlsrv_fetch_array($suTemporales, SQLSRV_FETCH_ASSOC)): ?>
+                                                <tr align="center">
+                                                    <td><?= $su['Nombres'] ?> <?= $su['Apellidos'] ?></td>
+                                                    <td><?= $su['fecha_inicio']->format('Y-m-d') ?></td>
+                                                    <td><?= $su['fecha_fin']->format('Y-m-d') ?></td>
+                                                    <td>
+
+                                                        <!-- EDITAR FECHAS -->
+                                                        <form method="POST" style="display:inline;">
+                                                            <input type="hidden" name="id_su_temp" value="<?= $su['id_su_temp'] ?>">
+                                                            <input type="date" name="nueva_fecha_inicio" required>
+                                                            <input type="date" name="nueva_fecha_fin" required>
+                                                            <button class="btn btn-sm btn-primary" name="editarFechas">
+                                                                <i class='fas fa-edit'></i>
+                                                            </button>
+                                                        </form>
+
+                                                        <!-- ELIMINAR SU TEMP -->
+                                                        <form method="POST" style="display:inline;" 
+                                                            onsubmit="return confirm('¿Desea eliminar este Super Usuario Temporal?');">
+                                                            <input type="hidden" name="id_su_temp" value="<?= $su['id_su_temp'] ?>">
+                                                            <button class="btn btn-sm btn-danger" name="eliminarSU">
+                                                               <i class='fas fa-trash'></i>
+                                                            </button>
+                                                        </form>
+
+                                                    </td>
+                                                </tr>
+                                                <?php endwhile; ?>
+                                            </tbody>
+                                        </table>
 
                                 </div>
 

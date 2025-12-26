@@ -138,12 +138,32 @@ if (!isset($_SESSION['acceso_registro']) || $_SESSION['acceso_registro'] !== tru
                                                                   <input type="phone" name="telefono" placeholder="Telefono" class="form-control" id="validationDefault05" required>
                                                             </td>
                                                       </tr>
-                                                      <tr align="center" valign="middle">
+                                                      <tr align="Left" valign="middle">
                                                             <td>
                                                                   Dependencia:
                                                             </td>
                                                             <td>
-                                                                  <input type="text" name="direccion" placeholder="Dependencia" class="form-control" id="validationDefault05" required>
+                                                                  <div style="max-height: 100px; overflow-y: auto; border: 1px solid #ccc; padding: 5px;">
+                                                                        <ul style="list-style: none; padding-left: 0; margin: 0;">
+                                                                        <?php
+                                                                              include('../bd/conexion.php');
+                                                                              $query = sqlsrv_query($conexionGestionIndicadores, "SELECT idCoordinacion, Coordinacion FROM Coordinacion");
+                                                                              if ($query) {
+                                                                              while ($row = sqlsrv_fetch_array($query, SQLSRV_FETCH_ASSOC)) {
+                                                                                    echo '
+                                                                                    <li>
+                                                                                          <div class="form-check">
+                                                                                          <input class="form-check-input" type="checkbox" name="coordinaciones[]" id="Coordinacion'.$row['idCoordinacion'].'" value="'.$row['idCoordinacion'].'">
+                                                                                          <label class="form-check-label" for="Coordinacion'.$row['idCoordinacion'].'">'.$row['Coordinacion'].'</label>
+                                                                                          </div>
+                                                                                    </li>';
+                                                                              }
+                                                                              } else {
+                                                                              echo '<li class="text-danger">Error al cargar las Dependencias.</li>';
+                                                                              }
+                                                                        ?>
+                                                                        </ul>
+                                                                  </div>
                                                             </td>
                                                             <td>
                                                                   Ciudad:
